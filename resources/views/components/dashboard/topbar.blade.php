@@ -1,14 +1,13 @@
 @props([
-    'currentDate' => '',
     'userName' => 'User',
     'userEmail' => 'user@example.com',
 ])
 
-<section class="topbar">
-    <div>
-        <p class="eyebrow">Academic Overview</p>
-        <h1 class="title">Welcome Gordon College Teacher</h1>
-        <p class="date">{{ $currentDate }}</p>
+<section class="topbar topbar-actions-only">
+    <div class="topbar-left">
+        <div class="ledger-inline" aria-label="Quick navigation">
+            <span class="ledger-inline-title">Teacher Portal</span>
+        </div>
     </div>
     <div class="top-actions">
         <button class="icon-btn" type="button" aria-label="Notifications">

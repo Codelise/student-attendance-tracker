@@ -69,16 +69,36 @@
 
     <div class="dashboard" id="dashboardRoot">
         <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
-        <x-dashboard.sidebar :userName="$userName" :userEmail="$userEmail" />
+        <x-dashboard.sidebar :userName="$userName" :userEmail="$userEmail" activePage="dashboard" />
 
         <main class="main">
-            <x-dashboard.topbar :currentDate="$currentDate" :userName="$userName" :userEmail="$userEmail" />
-            <x-dashboard.stats :stats="$stats" />
-
-            <section class="content">
-                <x-dashboard.recent-activity :items="$recentActivities" />
-                <x-dashboard.quick-actions :actions="$quickActions" />
+            <x-dashboard.topbar :userName="$userName" :userEmail="$userEmail" />
+            <section class="dashboard-hero">
+                <h1 class="title hero-title">Welcome, {{ $userName }}</h1>
+                <p class="date hero-date">{{ $currentDate }}</p>
             </section>
+            <div class="page-skeleton" style="padding: 0 4px;">
+                <div class="skeleton-grid" style="grid-template-columns:1fr 1fr 1fr; margin-bottom:10px;">
+                    <div class="skeleton-card" style="height:110px;"></div>
+                    <div class="skeleton-card" style="height:110px;"></div>
+                    <div class="skeleton-card" style="height:110px;"></div>
+                </div>
+                <div class="skeleton-grid" style="grid-template-columns:1fr 1fr;">
+                    <div class="skeleton-card" style="height:260px;"></div>
+                    <div class="skeleton-card" style="height:260px;"></div>
+                </div>
+            </div>
+
+            <div data-page-content>
+                <div data-animate data-animate-delay="1">
+                    <x-dashboard.stats :stats="$stats" />
+                </div>
+
+                <section class="content" data-animate data-animate-delay="2">
+                    <x-dashboard.recent-activity :items="$recentActivities" />
+                    <x-dashboard.quick-actions :actions="$quickActions" />
+                </section>
+            </div>
         </main>
     </div>
 

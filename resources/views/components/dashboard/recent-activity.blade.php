@@ -5,7 +5,7 @@
 <article class="panel">
     <div class="panel-head">
         <h3>Recent Activity</h3>
-        <a href="#">View All Records</a>
+        <a href="{{ route('reports') }}">View All Records</a>
     </div>
 
     <div class="activity">

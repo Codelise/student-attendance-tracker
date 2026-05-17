@@ -36,6 +36,11 @@
     .btn-primary{width:100%;background:#0d9488;color:white;border:none;border-radius:10px;padding:12px 20px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s,box-shadow .2s,transform .1s;letter-spacing:.02em;}
     .btn-primary:hover{background:#0f766e;box-shadow:0 4px 20px rgba(13,148,136,.3);transform:translateY(-1px);}
     .btn-primary:active{transform:translateY(0);}
+    .btn-primary[disabled]{opacity:.85;cursor:not-allowed;transform:none;box-shadow:none;}
+    .btn-loading{display:none;width:15px;height:15px;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;}
+    .is-submitting .btn-loading{display:inline-block;}
+    .is-submitting .btn-label,.is-submitting .btn-arrow{display:none;}
+    @keyframes spin{to{transform:rotate(360deg);}}
     .btn-sso{width:100%;background:white;color:#374151;border:1.5px solid #e2e8f0;border-radius:10px;padding:11px 20px;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:border-color .2s,box-shadow .2s;}
     .btn-sso:hover{border-color:#0d9488;box-shadow:0 2px 8px rgba(0,0,0,.06);}
     .check-wrap{display:flex;align-items:center;gap:8px;}
@@ -100,7 +105,7 @@
 
             <x-auth-session-status class="mb-4" :status="session('status')" />
 
-            <form method="POST" action="{{ route('login') }}" class="space-y fade-in-2">
+            <form method="POST" action="{{ route('login') }}" class="space-y fade-in-2" id="loginForm">
                 @csrf
 
                 <div>
@@ -134,9 +139,10 @@
                     <label for="remember_me">Remember this device for 30 days</label>
                 </div>
 
-                <button type="submit" class="btn-primary">
-                    Access Ledger
-                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                <button type="submit" class="btn-primary" id="loginSubmitBtn">
+                    <span class="btn-loading" aria-hidden="true"></span>
+                    <span class="btn-label">Access Ledger</span>
+                    <svg class="btn-arrow" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
                 </button>
 
                 <div class="divider">OR AUTHENTICATE WITH</div>
@@ -156,5 +162,6 @@
 
 <script>
 function togglePwd(id,btn){const el=document.getElementById(id);const show=el.type==='password';el.type=show?'text':'password';btn.innerHTML=show?`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>`:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>`;}
+const loginForm=document.getElementById('loginForm');const loginSubmitBtn=document.getElementById('loginSubmitBtn');if(loginForm&&loginSubmitBtn){loginForm.addEventListener('submit',function(){if(loginForm.classList.contains('is-submitting')){return;}loginForm.classList.add('is-submitting');loginSubmitBtn.setAttribute('disabled','disabled');Array.from(loginForm.elements).forEach(function(el){if(el!==loginSubmitBtn){el.setAttribute('readonly','readonly');el.setAttribute('aria-disabled','true');}});});}
 </script>
 </x-guest-layout>
