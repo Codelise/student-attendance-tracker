@@ -338,44 +338,54 @@
                     <div class="attendance-header" data-animate data-animate-delay="1">
                         <div>
                             <h2 class="attendance-title">Daily Attendance</h2>
-                            <p class="attendance-subtitle">Wednesday, October 25th - Section B-102</p>
+                            <p class="attendance-subtitle">Date: {{ date('l, F d, Y', strtotime($date)) }}</p>
                         </div>
                         <div class="attendance-controls">
-                            <button class="date-chip" type="button">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-                                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                                </svg>
-                                10/25/2023
-                            </button>
-                            <button class="load-btn" type="button" id="loadAttendanceBtn">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                    <polyline points="7 10 12 15 17 10"></polyline>
-                                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                                </svg>
-                                Load Attendance
-                            </button>
+                            <form method="GET" action="{{ route('add-attendance') }}" class="attendance-controls" id="dateFilterForm">
+                                <input type="date" name="date" class="date-chip" value="{{ $date }}" onchange="document.getElementById('dateFilterForm').submit()" style="padding: 0 0.85rem; border: 1px solid #d8e3ee; border-radius: 7px; height: 40px; font-family: inherit; font-size: 0.75rem; color: #415d78;" />
+                                <button class="load-btn" type="submit">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                    Load Attendance
+                                </button>
+                            </form>
                         </div>
                     </div>
+
+                    @if (session('success'))
+                        <div class="alert alert-success" style="background:#d3efec; color:#23726e; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.8rem;">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @php
+                        $total = count($students);
+                        $present = $students->filter(fn($s) => optional($s->attendances->first())->status === 'Present')->count();
+                        $absent = $students->filter(fn($s) => optional($s->attendances->first())->status === 'Absent')->count();
+                        $late = $students->filter(fn($s) => optional($s->attendances->first())->status === 'Late')->count();
+                        $marked = $students->filter(fn($s) => $s->attendances->isNotEmpty())->count();
+                        $pct = $total > 0 ? round(($marked / $total) * 100) : 0;
+                    @endphp
 
                     <div class="metric-grid" data-animate data-animate-delay="2">
                         <div class="metric-card total">
                             <h4>Total Students</h4>
-                            <p>42</p>
+                            <p>{{ $total }}</p>
                         </div>
                         <div class="metric-card">
                             <h4>Present</h4>
-                            <p>--</p>
+                            <p>{{ $present }}</p>
                         </div>
                         <div class="metric-card">
                             <h4>Absent</h4>
-                            <p class="warn">--</p>
+                            <p class="warn">{{ $absent }}</p>
                         </div>
                         <div class="metric-card complete">
                             <h4>Completion</h4>
-                            <p>0%</p>
+                            <p>{{ $pct }}%</p>
                         </div>
                     </div>
 
@@ -391,82 +401,55 @@
                         </div>
                     </div>
 
-                    <table class="att-table" data-animate data-animate-delay="3">
-                        <thead>
-                            <tr>
-                                <th>Student ID</th>
-                                <th>Student Name</th>
-                                <th>Attendance Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><span class="student-id">#GLC-2023-01</span></td>
-                                <td>
-                                    <div class="student-cell">
-                                        <span class="student-tag">AJ</span>
-                                        <div>
-                                            <p class="student-name">Anderson, Julian</p>
-                                            <p class="student-course">BS Computer Science - 3rd Year</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="status-group">
-                                        <button class="status-pill active" type="button">Present</button>
-                                        <button class="status-pill" type="button">Absent</button>
-                                        <button class="status-pill" type="button">Late</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><span class="student-id">#GLC-2023-02</span></td>
-                                <td>
-                                    <div class="student-cell">
-                                        <span class="student-tag bc">BC</span>
-                                        <div>
-                                            <p class="student-name">Bennett, Clara</p>
-                                            <p class="student-course">BS Information Systems - 2nd Year</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="status-group">
-                                        <button class="status-pill active" type="button">Present</button>
-                                        <button class="status-pill" type="button">Absent</button>
-                                        <button class="status-pill" type="button">Late</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><span class="student-id">#GLC-2023-05</span></td>
-                                <td>
-                                    <div class="student-cell">
-                                        <span class="student-tag ds">DS</span>
-                                        <div>
-                                            <p class="student-name">Davenport, Silas</p>
-                                            <p class="student-course">BS Computer Engineering - 4th Year</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="status-group">
-                                        <button class="status-pill active" type="button">Present</button>
-                                        <button class="status-pill" type="button">Absent</button>
-                                        <button class="status-pill" type="button">Late</button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <form method="POST" action="{{ route('attendance.store') }}" id="attendanceSubmitForm">
+                        @csrf
+                        <input type="hidden" name="date" value="{{ $date }}">
 
-                    <div class="footer-bar" data-animate data-animate-delay="4">
-                        <span class="footer-note">Changes are not saved until submitted.</span>
-                        <div class="footer-actions">
-                            <button class="cancel-btn" type="button" id="cancelAttendanceBtn">Cancel Entry</button>
-                            <button class="submit-btn" type="button" id="submitAttendanceBtn">Submit Attendance</button>
+                        <table class="att-table" data-animate data-animate-delay="3">
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Student Name</th>
+                                    <th>Attendance Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($students as $student)
+                                @php
+                                    $currentStatus = optional($student->attendances->first())->status ?? '';
+                                @endphp
+                                <tr>
+                                    <td><span class="student-id">{{ $student->student_id }}</span></td>
+                                    <td>
+                                        <div class="student-cell">
+                                            <span class="student-tag">{{ strtoupper(substr($student->name, 0, 2)) }}</span>
+                                            <div>
+                                                <p class="student-name">{{ $student->name }}</p>
+                                                <p class="student-course">Section {{ $student->section }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input type="hidden" name="attendance[{{ $student->id }}]" value="{{ $currentStatus }}" class="student-status-input" id="status-{{ $student->id }}">
+                                        <div class="status-group" data-student-id="{{ $student->id }}">
+                                            <button class="status-pill {{ $currentStatus === 'Present' ? 'active' : '' }}" type="button" data-status="Present">Present</button>
+                                            <button class="status-pill {{ $currentStatus === 'Absent' ? 'active' : '' }}" type="button" data-status="Absent">Absent</button>
+                                            <button class="status-pill {{ $currentStatus === 'Late' ? 'active' : '' }}" type="button" data-status="Late">Late</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+
+                        <div class="footer-bar" data-animate data-animate-delay="4">
+                            <span class="footer-note">Changes are not saved until submitted.</span>
+                            <div class="footer-actions">
+                                <a href="{{ route('dashboard') }}" class="cancel-btn" style="text-decoration:none; display:inline-flex; align-items:center;">Cancel Entry</a>
+                                <button class="submit-btn" type="submit" id="submitAttendanceBtn">Submit Attendance</button>
+                            </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </section>
         </main>
@@ -474,17 +457,19 @@
 
     <script>
         (function(){
-            const loadBtn = document.getElementById('loadAttendanceBtn');
-            const cancelBtn = document.getElementById('cancelAttendanceBtn');
-            const submitBtn = document.getElementById('submitAttendanceBtn');
             const markAllBtn = document.getElementById('markAllPresentBtn');
             const clearAllBtn = document.getElementById('clearAllAttendanceBtn');
             const statusGroups = Array.from(document.querySelectorAll('.status-group'));
 
             function setRowStatus(group, label){
+                const studentId = group.dataset.studentId;
+                const hiddenInput = document.getElementById('status-' + studentId);
+                if (hiddenInput) {
+                    hiddenInput.value = label;
+                }
                 const pills = group.querySelectorAll('.status-pill');
                 pills.forEach(function(pill){
-                    pill.classList.toggle('active', pill.textContent.trim() === label);
+                    pill.classList.toggle('active', pill.getAttribute('data-status') === label);
                 });
             }
 
@@ -492,25 +477,10 @@
                 group.addEventListener('click', function(e){
                     const target = e.target.closest('.status-pill');
                     if(!target) return;
-                    setRowStatus(group, target.textContent.trim());
+                    setRowStatus(group, target.getAttribute('data-status'));
                 });
             });
 
-            if(loadBtn){
-                loadBtn.addEventListener('click', function(){
-                    window.location.href = "{{ route('student-list') }}";
-                });
-            }
-            if(cancelBtn){
-                cancelBtn.addEventListener('click', function(){
-                    window.location.href = "{{ route('dashboard') }}";
-                });
-            }
-            if(submitBtn){
-                submitBtn.addEventListener('click', function(){
-                    window.location.href = "{{ route('reports') }}";
-                });
-            }
             if(markAllBtn){
                 markAllBtn.addEventListener('click', function(){
                     statusGroups.forEach(function(group){ setRowStatus(group, 'Present'); });
@@ -519,6 +489,11 @@
             if(clearAllBtn){
                 clearAllBtn.addEventListener('click', function(){
                     statusGroups.forEach(function(group){
+                        const studentId = group.dataset.studentId;
+                        const hiddenInput = document.getElementById('status-' + studentId);
+                        if (hiddenInput) {
+                            hiddenInput.value = '';
+                        }
                         group.querySelectorAll('.status-pill').forEach(function(pill){
                             pill.classList.remove('active');
                         });

@@ -145,40 +145,42 @@
                             <h2 class="insight-title">Attendance Insights</h2>
                             <p class="insight-sub">Analyze class participation patterns and student performance across specified time periods.</p>
                         </div>
-                        <form class="report-form" data-animate data-animate-delay="2" id="reportForm">
+                        <form class="report-form" method="GET" action="{{ route('reports') }}" data-animate data-animate-delay="2" id="reportForm">
                             <div>
                                 <label>Start Date</label>
-                                <input type="date" value="2023-09-03" id="reportStartDate" />
+                                <input type="date" name="start_date" value="{{ $startDate }}" id="reportStartDate" />
                             </div>
                             <div>
                                 <label>End Date</label>
-                                <input type="date" value="2023-12-15" id="reportEndDate" />
+                                <input type="date" name="end_date" value="{{ $endDate }}" id="reportEndDate" />
                             </div>
-                            <button class="gen-btn" type="submit">
-                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18"/><path d="M12 3v18"/></svg>
-                                Generate Report
-                            </button>
+                            <a href="{{ route('reports.pdf', ['start_date' => $startDate, 'end_date' => $endDate]) }}" class="gen-btn" target="_blank">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h14v16H5z"/><path d="M12 2v4"/></svg>
+                        Download PDF
+                    </a>
                         </form>
                     </div>
 
                     <div class="metric-row" data-animate data-animate-delay="2">
-                        <div class="insight-metric"><h4>Avg Attendance</h4><p>84.2%</p><small>+2.4% vs last term</small><svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 2 4-5"/></svg></div>
-                        <div class="insight-metric"><h4>Total Absences</h4><p>142</p><small>Total academic sessions</small><svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></div>
-                        <div class="insight-metric"><h4>Late Arrivals</h4><p>58</p><small>Requiring intervention: 12</small><svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
-                        <div class="insight-metric"><h4>Active Students</h4><p>32</p><small>Full enrollment active</small><svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M3.5 18a5.5 5.5 0 0111 0"/><path d="M17 11h4M19 9v4"/></svg></div>
+                        <div class="insight-metric"><h4>Avg Attendance</h4><p>{{ $avgAttendance }}%</p><small>Academic sessions avg</small><svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 2 4-5"/></svg></div>
+                        <div class="insight-metric"><h4>Total Absences</h4><p>{{ $totalAbsences }}</p><small>Total academic sessions</small><svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></div>
+                        <div class="insight-metric"><h4>Late Arrivals</h4><p>{{ $totalLate }}</p><small>Requiring intervention</small><svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+                        <div class="insight-metric"><h4>Active Students</h4><p>{{ $activeStudents }}</p><small>Full enrollment active</small><svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M3.5 18a5.5 5.5 0 0111 0"/><path d="M17 11h4M19 9v4"/></svg></div>
                     </div>
 
                     <div class="ledger" data-animate data-animate-delay="3" id="reportLedger">
                         <div class="ledger-head">
                             <div>
                                 <h3>Detailed Attendance Ledger</h3>
-                                <p>Showing data for 32 students in Mathematics 101</p>
+                                <p>Showing data for {{ $activeStudents }} students</p>
                             </div>
                             <div class="ledger-actions">
-                                <button type="button" id="reportFilterBtn">
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 4 21 4 14 12 14 19 10 21 10 12 3 4"/></svg>
-                                    Filter
-                                </button>
+                                <a href="{{ route('student-list') }}" style="text-decoration: none;">
+                                    <button type="button" id="reportFilterBtn">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 4 21 4 14 12 14 19 10 21 10 12 3 4"/></svg>
+                                        Manage Students
+                                    </button>
+                                </a>
                                 <button type="button" id="reportExportBtn">
                                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                     Export CSV
@@ -194,25 +196,34 @@
                                         <th>Present Sessions</th>
                                         <th>Absences</th>
                                         <th>Late Entries</th>
+                                        <th>Total Sessions</th>
                                         <th>Attendance</th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @foreach ($reportData as $row)
+                                    @php
+                                        $pillClass = 'good';
+                                        if ($row['rate'] < 75) {
+                                            $pillClass = 'bad';
+                                        } elseif ($row['rate'] < 90) {
+                                            $pillClass = 'warn';
+                                        }
+                                    @endphp
                                     <tr>
-                                        <td><span class="rid">T2024-0102</span></td>
-                                        <td><span class="name-wrap"><span class="name-avatar">AB</span>Alex Bennett</span></td>
-                                        <td>42</td><td>2</td><td>1</td><td><span class="att-pill good">93.3%</span></td>
+                                        <td><span class="rid">{{ $row['student_id'] }}</span></td>
+                                        <td>
+                                            <span class="name-wrap">
+                                                <span class="name-avatar">{{ strtoupper(substr($row['name'], 0, 2)) }}</span>
+                                                {{ $row['name'] }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $row['present'] }}</td>
+                                        <td>{{ $row['absent'] }}</td>
+                                        <td>{{ $row['late'] }}</td>
+                                        <td><span class="att-pill {{ $pillClass }}">{{ $row['rate'] }}%</span></td>
                                     </tr>
-                                    <tr>
-                                        <td><span class="rid">T2024-0118</span></td>
-                                        <td><span class="name-wrap"><span class="name-avatar ch">CH</span>Chloe Huang</span></td>
-                                        <td>35</td><td>8</td><td>2</td><td><span class="att-pill warn">77.8%</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><span class="rid">T2024-0095</span></td>
-                                        <td><span class="name-wrap"><span class="name-avatar dr">DR</span>Daniel Ross</span></td>
-                                        <td>21</td><td>19</td><td>5</td><td><span class="att-pill bad">46.7%</span></td>
-                                    </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>
@@ -223,33 +234,15 @@
     </div>
     <script>
         (function(){
-            const form = document.getElementById('reportForm');
-            const ledger = document.getElementById('reportLedger');
-            const filterBtn = document.getElementById('reportFilterBtn');
             const exportBtn = document.getElementById('reportExportBtn');
-
-            if(form){
-                form.addEventListener('submit', function(e){
-                    e.preventDefault();
-                    if(ledger){
-                        ledger.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                });
-            }
-
-            if(filterBtn){
-                filterBtn.addEventListener('click', function(){
-                    window.location.href = "{{ route('student-list') }}";
-                });
-            }
 
             if(exportBtn){
                 exportBtn.addEventListener('click', function(){
                     const csv = [
-                        ['Student ID','Full Name','Present Sessions','Absences','Late Entries','Attendance'],
-                        ['T2024-0102','Alex Bennett','42','2','1','93.3%'],
-                        ['T2024-0118','Chloe Huang','35','8','2','77.8%'],
-                        ['T2024-0095','Daniel Ross','21','19','5','46.7%']
+                        ['Student ID','Full Name','Present Sessions','Absences','Late Entries','Attendance Rate'],
+                        @foreach ($reportData as $row)
+                        [{{ json_encode($row['student_id']) }}, {{ json_encode($row['name']) }}, {{ json_encode($row['present']) }}, {{ json_encode($row['absent']) }}, {{ json_encode($row['late']) }}, {{ json_encode($row['rate'] . '%') }}],
+                        @endforeach
                     ].map(row => row.join(',')).join('\n');
                     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                     const link = document.createElement('a');
@@ -260,6 +253,14 @@
                     document.body.removeChild(link);
                     URL.revokeObjectURL(link.href);
                 });
+            }
+
+            // Auto-trigger export CSV on form submission (when dates are set in URL query)
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('start_date') || urlParams.has('end_date')) {
+                if (exportBtn) {
+                    exportBtn.click();
+                }
             }
         })();
     </script>

@@ -13,12 +13,12 @@
         $currentDate = now()->format('l, F d, Y');
 
         $stats = [
-            'total_enrollment' => '1,248',
-            'delta' => '+15% from last term',
-            'present_students' => '1,182',
-            'absent_students' => '42',
-            'late_arrivals' => '24',
-            'weekly_performance' => '94.8%',
+            'total_enrollment' => $totalStudents ?? 0,
+            'delta' => '+0% from last term', // Static for now, no term logic
+            'present_students' => $presentToday ?? 0,
+            'absent_students' => $absentToday ?? 0,
+            'late_arrivals' => $lateToday ?? 0,
+            'weekly_performance' => ($attendanceRate ?? 0) . '%',
         ];
 
         $recentActivities = [

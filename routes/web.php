@@ -11,14 +11,20 @@ Route::get('/', function () {
     return redirect('/login');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
+Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 Route::middleware('auth')->group(function () {
-    Route::view('/student-list', 'student-list')->name('student-list');
-    Route::view('/add-attendance', 'add-attendance')->name('add-attendance');
-    Route::view('/reports', 'reports')->name('reports');
+    Route::resource('students', \App\Http\Controllers\StudentController::class)->except(['create', 'show', 'edit'])->names([
+        'index' => 'student-list',
+    ]);
+    
+    Route::get('/attendance', [\App\Http\Controllers\AttendanceController::class, 'index'])->name('add-attendance');
+    Route::post('/attendance', [\App\Http\Controllers\AttendanceController::class, 'store'])->name('attendance.store');
+    
+    Route::get('/reports/pdf', [\App\Http\Controllers\ReportController::class, 'pdf'])->name('reports.pdf');
+    
+    Route::get('/reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports');
+
+
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

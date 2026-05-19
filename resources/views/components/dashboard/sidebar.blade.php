@@ -42,7 +42,9 @@
     </div>
 
     <div>
-        <a class="new-entry" href="{{ route('add-attendance') }}"><span>+ New Entry</span></a>
+        @if(auth()->user()->role !== 'student')
+            <a class="new-entry" href="{{ route('add-attendance') }}"><span>+ New Entry</span></a>
+        @endif
         <nav class="menu">
             <a href="#">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 115.82 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>

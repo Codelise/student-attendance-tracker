@@ -393,20 +393,35 @@
                     <h2 class="registry-title" data-animate data-animate-delay="1">Student Registry</h2>
                     <p class="registry-subtitle" data-animate data-animate-delay="1">Manage and monitor academic attendance records with institutional precision.</p>
 
+                    @if ($errors->any())
+                        <div class="alert alert-danger" style="background:#ffdede; color:#9f3131; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.8rem;">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                    @if (session('success'))
+                        <div class="alert alert-success" style="background:#d3efec; color:#23726e; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.8rem;">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
                     <div class="registry-controls" data-animate data-animate-delay="2">
                         <div class="registry-input-wrap">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="11" cy="11" r="8"></circle>
                                 <path d="m21 21-4.35-4.35"></path>
                             </svg>
-                            <input class="registry-input" type="text" placeholder="Search by student name or ID..." />
+                            <input class="registry-input" type="text" id="studentSearchInput" placeholder="Search by student name or ID..." />
                         </div>
 
-                        <select class="registry-select">
-                            <option>All Sections</option>
-                            <option>BSc Computer Science</option>
-                            <option>Advanced Calculus</option>
-                            <option>Digital Marketing</option>
+                        <select class="registry-select" id="sectionFilterSelect">
+                            <option value="All Sections">All Sections</option>
+                            @foreach ($students->pluck('section')->unique()->sort() as $section)
+                                <option value="{{ $section }}">{{ $section }}</option>
+                            @endforeach
                         </select>
 
                         <button class="registry-btn" type="button" id="openAddStudentModal">+ Add New Student</button>
@@ -423,116 +438,54 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td><span class="student-code">AGC-2024-001</span></td>
-                                <td><span class="student-name"><span class="avatar-chip">AB</span>Alexander Bennett</span></td>
-                                <td>BSc Computer Science</td>
+                            @foreach ($students as $student)
+                            <tr class="student-row" 
+                                data-name="{{ strtolower($student->name) }}" 
+                                data-student-id="{{ strtolower($student->student_id) }}" 
+                                data-section="{{ $student->section }}">
+                                <td><span class="student-code">{{ $student->student_id }}</span></td>
+                                <td>
+                                    <span class="student-name">
+                                        <span class="avatar-chip">{{ strtoupper(substr($student->name, 0, 2)) }}</span>
+                                        {{ $student->name }}
+                                    </span>
+                                </td>
+                                <td>{{ $student->section }}</td>
                                 <td><span class="status active">Active</span></td>
                                 <td>
                                     <div class="actions">
-                                        <button class="action-btn open-student-profile" type="button" aria-label="Edit student">
+                                        <button class="action-btn open-student-profile" type="button" aria-label="Edit student"
+                                                data-id="{{ $student->id }}"
+                                                data-name="{{ $student->name }}"
+                                                data-student-id="{{ $student->student_id }}"
+                                                data-section="{{ $student->section }}"
+                                                data-phone="{{ $student->phone }}">
                                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                 <path d="M12 20h9"></path>
                                                 <path d="M16.5 3.5a2.1 2.1 0 113 3L7 19l-4 1 1-4 12.5-12.5z"></path>
                                             </svg>
                                         </button>
-                                        <button class="action-btn delete" type="button" aria-label="Delete student">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <polyline points="3 6 5 6 21 6"></polyline>
-                                                <path d="M19 6l-1 14H6L5 6"></path>
-                                                <path d="M10 11v6M14 11v6"></path>
-                                                <path d="M9 6V4h6v2"></path>
-                                            </svg>
-                                        </button>
+                                        <form action="{{ route('students.destroy', $student->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this student?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="action-btn delete" type="submit" aria-label="Delete student">
+                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                                    <path d="M19 6l-1 14H6L5 6"></path>
+                                                    <path d="M10 11v6M14 11v6"></path>
+                                                    <path d="M9 6V4h6v2"></path>
+                                                </svg>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
-                            <tr>
-                                <td><span class="student-code">AGC-2024-042</span></td>
-                                <td><span class="student-name"><span class="avatar-chip cr">CR</span>Cassandra Rivers</span></td>
-                                <td>Advanced Calculus</td>
-                                <td><span class="status active">Active</span></td>
-                                <td>
-                                    <div class="actions">
-                                        <button class="action-btn open-student-profile" type="button" aria-label="Edit student">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M12 20h9"></path>
-                                                <path d="M16.5 3.5a2.1 2.1 0 113 3L7 19l-4 1 1-4 12.5-12.5z"></path>
-                                            </svg>
-                                        </button>
-                                        <button class="action-btn delete" type="button" aria-label="Delete student">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <polyline points="3 6 5 6 21 6"></polyline>
-                                                <path d="M19 6l-1 14H6L5 6"></path>
-                                                <path d="M10 11v6M14 11v6"></path>
-                                                <path d="M9 6V4h6v2"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><span class="student-code">AGC-2024-118</span></td>
-                                <td><span class="student-name"><span class="avatar-chip dm">DM</span>Dominic Marino</span></td>
-                                <td>Digital Marketing</td>
-                                <td><span class="status inactive">Inactive</span></td>
-                                <td>
-                                    <div class="actions">
-                                        <button class="action-btn open-student-profile" type="button" aria-label="Edit student">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M12 20h9"></path>
-                                                <path d="M16.5 3.5a2.1 2.1 0 113 3L7 19l-4 1 1-4 12.5-12.5z"></path>
-                                            </svg>
-                                        </button>
-                                        <button class="action-btn delete" type="button" aria-label="Delete student">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <polyline points="3 6 5 6 21 6"></polyline>
-                                                <path d="M19 6l-1 14H6L5 6"></path>
-                                                <path d="M10 11v6M14 11v6"></path>
-                                                <path d="M9 6V4h6v2"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><span class="student-code">AGC-2024-029</span></td>
-                                <td><span class="student-name"><span class="avatar-chip lh">LH</span>Liam Henderson</span></td>
-                                <td>BSc Computer Science</td>
-                                <td><span class="status active">Active</span></td>
-                                <td>
-                                    <div class="actions">
-                                        <button class="action-btn open-student-profile" type="button" aria-label="Edit student">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M12 20h9"></path>
-                                                <path d="M16.5 3.5a2.1 2.1 0 113 3L7 19l-4 1 1-4 12.5-12.5z"></path>
-                                            </svg>
-                                        </button>
-                                        <button class="action-btn delete" type="button" aria-label="Delete student">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <polyline points="3 6 5 6 21 6"></polyline>
-                                                <path d="M19 6l-1 14H6L5 6"></path>
-                                                <path d="M10 11v6M14 11v6"></path>
-                                                <path d="M9 6V4h6v2"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
+                            @endforeach
                         </tbody>
                     </table>
 
                     <div class="pagination-row" data-animate data-animate-delay="4">
-                        <span>Showing 4 of 1,280 students</span>
-                        <div class="pager">
-                            <button type="button">&lt;</button>
-                            <button type="button" class="active">1</button>
-                            <button type="button">2</button>
-                            <button type="button">3</button>
-                            <button type="button">...</button>
-                            <button type="button">45</button>
-                            <button type="button">&gt;</button>
-                        </div>
+                        <span>Showing {{ count($students) }} students</span>
                     </div>
                 </div>
             </section>
@@ -547,42 +500,26 @@
                 </div>
                 <button class="modal-close" type="button" id="closeAddStudentModal" aria-label="Close modal">x</button>
             </div>
-            <form class="student-form" id="addStudentForm">
-                <div class="student-image-id">
-                    <div class="student-image-box">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                        Upload
-                    </div>
-                    <div>
-                        <label>Student ID</label>
-                        <input type="text" placeholder="GC-2023-145" required />
-                    </div>
+            <form class="student-form" id="studentForm" method="POST" action="{{ route('students.store') }}">
+                @csrf
+                <input type="hidden" name="_method" id="formMethod" value="POST">
+                
+                <div>
+                    <label>Student ID</label>
+                    <input type="text" name="student_id" id="studentIdInput" placeholder="GC-2023-145" required />
                 </div>
                 <div>
                     <label>Full Name</label>
-                    <input type="text" placeholder="e.g. Julianna V. Rivers" required />
+                    <input type="text" name="name" id="studentNameInput" placeholder="e.g. Julianna V. Rivers" required />
                 </div>
                 <div class="form-grid-2">
                     <div>
                         <label>Academic Section</label>
-                        <select required>
-                            <option value="">Select Section</option>
-                            <option>Alpha-1</option>
-                            <option>Beta-2</option>
-                            <option>Gamma-3</option>
-                        </select>
+                        <input type="text" name="section" id="studentSectionInput" placeholder="e.g. Alpha-1" required />
                     </div>
                     <div>
                         <label>Contact Phone</label>
-                        <input type="text" placeholder="+1 (555) 000-0000" />
-                    </div>
-                </div>
-                <div>
-                    <label>Initial Registry Status</label>
-                    <div class="status-toggle">
-                        <button type="button" class="active" data-status="Present">Present</button>
-                        <button type="button" data-status="Absent">Absent</button>
-                        <button type="button" data-status="Late">Late</button>
+                        <input type="text" name="phone" id="studentPhoneInput" placeholder="+1 (555) 000-0000" />
                     </div>
                 </div>
                 <div class="modal-actions">
@@ -600,8 +537,13 @@
             const backdrop = document.getElementById('addStudentModalBackdrop');
             const closeBtn = document.getElementById('closeAddStudentModal');
             const cancelBtn = document.getElementById('cancelAddStudentModal');
-            const form = document.getElementById('addStudentForm');
-            const statusBtns = backdrop ? backdrop.querySelectorAll('.status-toggle button') : [];
+            const form = document.getElementById('studentForm');
+            const formMethod = document.getElementById('formMethod');
+            const modalTitle = document.getElementById('addStudentModalTitle');
+            const studentIdInput = document.getElementById('studentIdInput');
+            const studentNameInput = document.getElementById('studentNameInput');
+            const studentSectionInput = document.getElementById('studentSectionInput');
+            const studentPhoneInput = document.getElementById('studentPhoneInput');
 
             function closeModal(){
                 if(!backdrop) return;
@@ -610,15 +552,45 @@
                 document.body.classList.remove('no-scroll');
             }
 
-            function openModal(){
+            function openAddModal(){
                 if(!backdrop) return;
+                modalTitle.textContent = "Add New Student";
+                form.setAttribute('action', "{{ route('students.store') }}");
+                formMethod.value = "POST";
+                studentIdInput.value = "";
+                studentNameInput.value = "";
+                studentSectionInput.value = "";
+                if(studentPhoneInput) studentPhoneInput.value = "";
+                
                 backdrop.classList.add('open');
                 backdrop.setAttribute('aria-hidden', 'false');
                 document.body.classList.add('no-scroll');
             }
 
-            if(openBtn){ openBtn.addEventListener('click', openModal); }
-            editBtns.forEach(function(btn){ btn.addEventListener('click', openModal); });
+            function openEditModal(e){
+                if(!backdrop) return;
+                const button = e.currentTarget;
+                const id = button.dataset.id;
+                const name = button.dataset.name;
+                const studentId = button.dataset.studentId;
+                const section = button.dataset.section;
+                const phone = button.dataset.phone || '';
+
+                modalTitle.textContent = "Edit Student Profile";
+                form.setAttribute('action', `/students/${id}`);
+                formMethod.value = "PUT";
+                studentIdInput.value = studentId;
+                studentNameInput.value = name;
+                studentSectionInput.value = section;
+                if(studentPhoneInput) studentPhoneInput.value = phone;
+
+                backdrop.classList.add('open');
+                backdrop.setAttribute('aria-hidden', 'false');
+                document.body.classList.add('no-scroll');
+            }
+
+            if(openBtn){ openBtn.addEventListener('click', openAddModal); }
+            editBtns.forEach(function(btn){ btn.addEventListener('click', openEditModal); });
             if(closeBtn){ closeBtn.addEventListener('click', closeModal); }
             if(cancelBtn){ cancelBtn.addEventListener('click', closeModal); }
 
@@ -628,23 +600,36 @@
                 });
             }
 
-            statusBtns.forEach(function(btn){
-                btn.addEventListener('click', function(){
-                    statusBtns.forEach(function(x){ x.classList.remove('active'); });
-                    btn.classList.add('active');
-                });
-            });
-
-            if(form){
-                form.addEventListener('submit', function(e){
-                    e.preventDefault();
-                    closeModal();
-                });
-            }
-
             document.addEventListener('keydown', function(e){
                 if(e.key === 'Escape'){ closeModal(); }
             });
+            // Client-side Search and Filter logic
+            const searchInput = document.getElementById('studentSearchInput');
+            const sectionSelect = document.getElementById('sectionFilterSelect');
+            const studentRows = document.querySelectorAll('.student-row');
+
+            function filterStudents() {
+                const query = searchInput.value.toLowerCase().trim();
+                const selectedSection = sectionSelect.value;
+
+                studentRows.forEach(row => {
+                    const name = row.getAttribute('data-name');
+                    const studentId = row.getAttribute('data-student-id');
+                    const section = row.getAttribute('data-section');
+
+                    const matchesSearch = name.includes(query) || studentId.includes(query);
+                    const matchesSection = selectedSection === 'All Sections' || section === selectedSection;
+
+                    if (matchesSearch && matchesSection) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+
+            if (searchInput) searchInput.addEventListener('input', filterStudents);
+            if (sectionSelect) sectionSelect.addEventListener('change', filterStudents);
         })();
     </script>
     <x-dashboard.scripts />
